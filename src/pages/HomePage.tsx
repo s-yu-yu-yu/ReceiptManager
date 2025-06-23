@@ -1,16 +1,40 @@
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 export function HomePage() {
+  const navigate = useNavigate();
+
   // 仮のデータ（後でIndexedDBから取得）
-  const currentMonth = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' });
+  const currentMonth = new Date().toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "long",
+  });
   const monthlyTotal = 45280;
   const todayTotal = 3450;
   const recentReceipts = [
-    { id: 1, store: 'セブンイレブン', amount: 1280, date: '2024-01-15', category: '食費' },
-    { id: 2, store: 'イオン', amount: 5430, date: '2024-01-15', category: '日用品' },
-    { id: 3, store: 'スターバックス', amount: 650, date: '2024-01-14', category: '外食' },
+    {
+      id: 1,
+      store: "セブンイレブン",
+      amount: 1280,
+      date: "2024-01-15",
+      category: "食費",
+    },
+    {
+      id: 2,
+      store: "イオン",
+      amount: 5430,
+      date: "2024-01-15",
+      category: "日用品",
+    },
+    {
+      id: 3,
+      store: "スターバックス",
+      amount: 650,
+      date: "2024-01-14",
+      category: "外食",
+    },
   ];
 
   return (
@@ -29,7 +53,9 @@ export function HomePage() {
           <CardTitle className="text-base">本日の支出</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-semibold">¥{todayTotal.toLocaleString()}</p>
+          <p className="text-2xl font-semibold">
+            ¥{todayTotal.toLocaleString()}
+          </p>
         </CardContent>
       </Card>
 
@@ -38,16 +64,25 @@ export function HomePage() {
         <h2 className="text-lg font-semibold mb-3">最近のレシート</h2>
         <div className="space-y-3">
           {recentReceipts.map((receipt) => (
-            <Card key={receipt.id} className="cursor-pointer hover:shadow-md transition-shadow">
+            <Card
+              key={receipt.id}
+              className="cursor-pointer hover:shadow-md transition-shadow"
+            >
               <CardContent className="p-4">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-medium">{receipt.store}</h3>
-                    <p className="text-sm text-muted-foreground">{receipt.category}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {receipt.category}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">¥{receipt.amount.toLocaleString()}</p>
-                    <p className="text-sm text-muted-foreground">{receipt.date}</p>
+                    <p className="font-semibold">
+                      ¥{receipt.amount.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {receipt.date}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -60,6 +95,7 @@ export function HomePage() {
       <Button
         size="icon"
         className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg"
+        onClick={() => navigate("/receipts/add")}
       >
         <Plus className="h-6 w-6" />
       </Button>

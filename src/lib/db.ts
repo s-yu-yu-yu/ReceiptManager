@@ -18,7 +18,7 @@ export class ReceiptDatabase extends Dexie {
     super("ReceiptDatabase");
 
     this.version(1).stores({
-      receipts: "++id, store, date, category, createdAt",
+      receipts: "id, date, storeName, totalAmount, createdAt",
       receiptItems: "++id, receiptId, name, category",
       categories: "++id, name, order",
       monthlyBudgets: "++id, yearMonth, categoryId",

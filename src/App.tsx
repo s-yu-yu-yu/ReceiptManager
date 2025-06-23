@@ -4,6 +4,7 @@ import { HomePage } from "@/pages/HomePage";
 import { AnalyticsPage } from "@/pages/AnalyticsPage";
 import { ReceiptsPage } from "@/pages/ReceiptsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import AddReceiptPage from "@/pages/AddReceiptPage";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/receipts" element={<ReceiptsPage />} />
+          <Route path="/receipts/add" element={<AddReceiptPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
         <BottomNavigation />

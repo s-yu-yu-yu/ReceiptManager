@@ -1,22 +1,20 @@
 export interface Receipt {
-  id?: number;
-  store: string;
-  amount: number;
-  date: string; // YYYY-MM-DD形式
-  category: string;
+  id?: string;
+  date: Date;
+  storeName: string;
   items: ReceiptItem[];
+  totalAmount: number;
   imageUrl?: string;
-  memo?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface ReceiptItem {
-  id?: number;
-  receiptId?: number;
+  id: string;
   name: string;
-  price: number;
   quantity: number;
+  unitPrice: number;
+  totalPrice: number;
   category?: string;
 }
 
