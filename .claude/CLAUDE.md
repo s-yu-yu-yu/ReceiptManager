@@ -16,7 +16,7 @@ Receipt Manager は、レシート画像を AI（Gemini API）で解析し、家
 - **アイコン**: Lucide React
 - **ルーティング**: React Router DOM 7.6.2
 - **状態管理**: Zustand 5.0.5
-- **カメラ機能**: React Webcam
+- **カメラ機能**: React Camera Pro 1.4.0
 - **チャート表示**: Recharts
 
 ### バックエンド・データベース
@@ -28,7 +28,7 @@ Receipt Manager は、レシート画像を AI（Gemini API）で解析し、家
 
 - **バンドラー**: Vite
 - **Linter**: ESLint 9.25.0 + TypeScript ESLint
-- **パッケージマネージャー**: npm（bun.lockb が存在するため bun 推奨）
+- **パッケージマネージャー**: bun（npm から移行済み）
 
 ## アーキテクチャ
 
@@ -47,11 +47,13 @@ Receipt Manager は、レシート画像を AI（Gemini API）で解析し、家
 │       ├── card.tsx
 │       ├── input.tsx
 │       ├── label.tsx
-│       └── select.tsx
+│       ├── select.tsx
+│       └── FloatingActionButton.tsx # FAB共通コンポーネント
 ├── lib/                # ユーティリティ
 │   ├── db.ts          # Dexie データベース設定
 │   ├── gemini.ts      # Gemini API連携
-│   ├── imageUtils.ts  # 画像処理ユーティリティ
+│   ├── categories.ts  # カテゴリ一元管理
+│   ├── homeHelpers.ts # ホーム画面用データ集計
 │   └── utils.ts       # 汎用ユーティリティ
 ├── pages/              # ページコンポーネント
 │   ├── AddReceiptPage.tsx    # レシート追加
@@ -69,7 +71,8 @@ Receipt Manager は、レシート画像を AI（Gemini API）で解析し、家
 
 ### 1. レシート撮影・AI 解析
 
-- **カメラ撮影**: React Webcam によるレシート撮影
+- **カメラ撮影**: React Camera Pro によるモバイル最適化レシート撮影
+- **高品質撮影**: フルHD解像度、背面カメラ自動選択、最適化された画質
 - **AI 解析**: Gemini API でレシート画像から以下を自動抽出
   - 店舗名
   - 購入日
@@ -105,7 +108,7 @@ Receipt Manager は、レシート画像を AI（Gemini API）で解析し、家
 ```typescript
 // Receipt: レシート基本情報
 interface Receipt {
-  id?: string;
+  id?: number;
   date: Date;
   storeName: string;
   items: ReceiptItem[];
@@ -159,16 +162,16 @@ interface Category {
 
 ```bash
 # 開発サーバー起動
-npm run dev
+bun run dev
 
 # プロダクションビルド
-npm run build
+bun run build
 
 # Lint実行
-npm run lint
+bun run lint
 
 # プレビュー
-npm run preview
+bun run preview
 ```
 
 ### 環境変数
@@ -254,23 +257,23 @@ test: テスト追加・修正
 
 ```bash
 # node_modules再インストール
-rm -rf node_modules package-lock.json && npm install
+rm -rf node_modules bun.lockb && bun install
 
 # キャッシュクリア
 rm -rf dist .vite
 
 # 型チェック
-npx tsc --noEmit
+bun x tsc --noEmit
 ```
 
 ### 既知の問題
 
 - Gemini API 制限: リクエスト頻度制限に注意
-- 画像サイズ: 大きすぎる画像は事前リサイズが必要
 - ブラウザ互換性: IndexedDB 対応ブラウザでのみ動作
+- カメラ機能: HTTPS環境またはlocalhostでのみ動作
 
 ## パッケージ管理
 
-- **現在**: npm 使用
-- **推奨**: bun（bun.lockb ファイル存在のため）
-- **移行**: `bun install`で bun に移行可能
+- **現在**: bun 使用（npm から移行済み）
+- **ロックファイル**: bun.lockb
+- **推奨**: 継続して bun を使用
