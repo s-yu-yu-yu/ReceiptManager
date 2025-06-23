@@ -38,7 +38,7 @@ export default function AddReceiptPage() {
 
     try {
       // 画像を最適化
-      const optimizedImage = await optimizeScreenshot(
+      const optimizedImage = optimizeScreenshot(
         `data:image/jpeg;base64,${imageBase64}`
       );
       setCapturedImage(`data:image/jpeg;base64,${optimizedImage}`);
@@ -67,7 +67,7 @@ export default function AddReceiptPage() {
       const now = new Date();
       const receipt: Receipt = {
         ...receiptData,
-        id: crypto.randomUUID(),
+        id: Date.now(), // タイムスタンプを使用してユニークなIDを生成
         createdAt: now,
         updatedAt: now,
       };
