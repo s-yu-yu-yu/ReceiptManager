@@ -130,6 +130,24 @@ export const ReceiptConfirmation: React.FC<ReceiptConfirmationProps> = ({
           </Card>
         )}
 
+        {/* 撮影画像 */}
+        {capturedImage && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">撮影画像</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-center">
+                <img
+                  src={capturedImage}
+                  alt="撮影したレシート"
+                  className="max-w-full max-h-96 object-contain rounded-lg border"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* 基本情報 */}
         <Card className="mb-6">
           <CardHeader>

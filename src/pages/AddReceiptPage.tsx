@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CameraCapture } from "@/components/features/CameraCapture";
 import { ReceiptConfirmation } from "@/components/features/ReceiptConfirmation";
 import { analyzeReceipt, type AnalyzedReceipt } from "@/lib/gemini";
-import { optimizeScreenshot } from "@/lib/imageUtils";
 import { db } from "@/lib/db";
 import { type Receipt } from "@/types";
 import { useNavigate } from "react-router-dom";
@@ -37,14 +36,12 @@ export default function AddReceiptPage() {
     setError("");
 
     try {
-      // 画像を最適化
-      const optimizedImage = optimizeScreenshot(
-        `data:image/jpeg;base64,${imageBase64}`
-      );
-      setCapturedImage(`data:image/jpeg;base64,${optimizedImage}`);
+      // 元画像をそのまま使用（品質劣化を防ぐ）
+      const capturedImageUrl = `data:image/jpeg;base64,${imageBase64}`;
+      setCapturedImage(capturedImageUrl);
 
-      // Gemini AIで解析
-      const result = await analyzeReceipt(optimizedImage);
+      // Gemini AIで解析（元画像のBase64データを使用）
+      const result = await analyzeReceipt(imageBase64);
       setAnalyzedData(result);
       setStep("confirmation");
     } catch (err) {
