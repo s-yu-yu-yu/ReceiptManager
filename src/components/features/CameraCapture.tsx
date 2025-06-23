@@ -1,6 +1,6 @@
 import React, { useRef, useCallback, useState } from "react";
-import Webcam from "react-webcam";
-import { Camera, RotateCcw, Check, X } from "lucide-react";
+import { Camera } from "react-camera-pro";
+import { Camera as CameraIcon, RotateCcw, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -15,16 +15,16 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   onClose,
   isAnalyzing = false,
 }) => {
-  const webcamRef = useRef<Webcam>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cameraRef = useRef<any>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [isCameraReady, setIsCameraReady] = useState(false);
 
   const capture = useCallback(() => {
-    const imageSrc = webcamRef.current?.getScreenshot();
+    const imageSrc = cameraRef.current?.takePhoto();
     if (imageSrc) {
       setCapturedImage(imageSrc);
     }
-  }, [webcamRef]);
+  }, []);
 
   const retake = useCallback(() => {
     setCapturedImage(null);
@@ -37,17 +37,6 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
       onCapture(base64Data);
     }
   }, [capturedImage, onCapture]);
-
-  const handleUserMedia = useCallback(() => {
-    setIsCameraReady(true);
-  }, []);
-
-  const videoConstraints = {
-    width: { ideal: 1080 },
-    height: { ideal: 1920 }, // 縦長（9:16）でレシート撮影に最適
-    aspectRatio: 9 / 16,
-    facingMode: "environment", // 背面カメラを優先
-  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
@@ -71,14 +60,16 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
             <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-[3/4]">
               {!capturedImage ? (
                 <>
-                  <Webcam
-                    ref={webcamRef}
-                    audio={false}
-                    screenshotFormat="image/png"
-                    screenshotQuality={1.0}
-                    videoConstraints={videoConstraints}
-                    onUserMedia={handleUserMedia}
-                    className="w-full h-full object-cover"
+                  <Camera
+                    ref={cameraRef}
+                    facingMode="environment"
+                    aspectRatio="cover"
+                    errorMessages={{
+                      noCameraAccessible: "カメラにアクセスできません",
+                      permissionDenied: "カメラの許可が拒否されました",
+                      switchCamera: "カメラの切り替えに失敗しました",
+                      canvas: "Canvas not supported",
+                    }}
                   />
 
                   {/* ガイド枠 */}
@@ -94,16 +85,6 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
                     <div className="absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2 border-white"></div>
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 border-white"></div>
                   </div>
-
-                  {/* カメラ準備中の表示 */}
-                  {!isCameraReady && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-                      <div className="text-center text-gray-600">
-                        <Camera size={32} className="mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">カメラを準備中...</p>
-                      </div>
-                    </div>
-                  )}
                 </>
               ) : (
                 <img
@@ -119,10 +100,10 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
               {!capturedImage ? (
                 <Button
                   onClick={capture}
-                  disabled={!isCameraReady || isAnalyzing}
+                  disabled={isAnalyzing}
                   className="px-8 py-3"
                 >
-                  <Camera size={20} className="mr-2" />
+                  <CameraIcon size={20} className="mr-2" />
                   撮影
                 </Button>
               ) : (
