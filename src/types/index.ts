@@ -38,5 +38,5 @@ export interface MonthlyBudget {
 export interface Settings {
   id?: number;
   key: string;
-  value: any;
+  value: string | number | boolean | object;
 }

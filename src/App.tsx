@@ -1,9 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { BottomNavigation } from '@/components/layout/BottomNavigation';
-import { HomePage } from '@/pages/HomePage';
-import { AnalyticsPage } from '@/pages/AnalyticsPage';
-import { ReceiptsPage } from '@/pages/ReceiptsPage';
-import { SettingsPage } from '@/pages/SettingsPage';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BottomNavigation } from "@/components/layout/BottomNavigation";
+import { HomePage } from "@/pages/HomePage";
+import { AnalyticsPage } from "@/pages/AnalyticsPage";
+import { ReceiptsPage } from "@/pages/ReceiptsPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 
 function App() {
   return (
