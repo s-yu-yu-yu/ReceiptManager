@@ -5,9 +5,9 @@ import {
   type Category,
   type MonthlyBudget,
   type Settings,
-} from "@/types/index.js";
+} from "@/types";
 
-export class ReceiptDatabase extends Dexie {
+class ReceiptDatabase extends Dexie {
   receipts!: Table<Receipt>;
   receiptItems!: Table<ReceiptItem>;
   categories!: Table<Category>;

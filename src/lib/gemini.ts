@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { getCategoryNames } from "./categories";
 
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
@@ -20,6 +21,7 @@ export async function analyzeReceipt(
   imageBase64: string
 ): Promise<AnalyzedReceipt> {
   try {
+    const categories = getCategoryNames().join('、');
     const prompt = `レシート画像から以下の情報を抽出してください：
 
 必須項目：
@@ -30,7 +32,7 @@ export async function analyzeReceipt(
   - 数量 (quantity)
   - 単価 (unitPrice)
   - 合計金額 (totalPrice)
-  - カテゴリ (category: 食品、日用品、衣類、その他から選択)
+  - カテゴリ (category: ${categories}から選択)
 - 合計金額 (totalAmount)
 - 解析信頼度 (confidence: 0-1の値)
 

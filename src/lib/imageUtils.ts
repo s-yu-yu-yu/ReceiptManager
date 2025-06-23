@@ -10,9 +10,9 @@ export interface ImageResizeOptions {
 }
 
 /**
- * 画像をリサイズしてBase64形式で返す
+ * 画像をリサイズしてBase64形式で返す（内部使用のみ）
  */
-export function resizeImageToBase64(
+function resizeImageToBase64(
   file: File | string,
   options: ImageResizeOptions = {}
 ): Promise<string> {
@@ -103,46 +103,3 @@ export function optimizeScreenshot(
   });
 }
 
-/**
- * ファイルサイズをチェック（MB単位）
- */
-export function checkFileSize(base64Data: string, maxSizeMB: number = 5): boolean {
-  // Base64データのサイズを計算（バイト）
-  const sizeInBytes = (base64Data.length * 3) / 4;
-  const sizeInMB = sizeInBytes / (1024 * 1024);
-  
-  return sizeInMB <= maxSizeMB;
-}
-
-/**
- * 画像の縦横比を保持してリサイズサイズを計算
- */
-export function calculateAspectRatioSize(
-  originalWidth: number,
-  originalHeight: number,
-  maxWidth: number,
-  maxHeight: number
-): { width: number; height: number } {
-  const ratio = Math.min(maxWidth / originalWidth, maxHeight / originalHeight, 1);
-  
-  return {
-    width: Math.floor(originalWidth * ratio),
-    height: Math.floor(originalHeight * ratio)
-  };
-}
-
-/**
- * 画像形式の判定
- */
-export function getImageFormat(dataUrl: string): string | null {
-  const match = dataUrl.match(/^data:image\/([a-zA-Z]+);base64,/);
-  return match ? match[1] : null;
-}
-
-/**
- * Base64データのサイズを取得（MB単位）
- */
-export function getBase64Size(base64Data: string): number {
-  const sizeInBytes = (base64Data.length * 3) / 4;
-  return sizeInBytes / (1024 * 1024);
-}

@@ -1,5 +1,5 @@
 export interface Receipt {
-  id?: string;
+  id?: number;
   date: Date;
   storeName: string;
   items: ReceiptItem[];

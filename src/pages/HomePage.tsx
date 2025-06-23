@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { type Receipt } from "@/types";
@@ -104,13 +105,9 @@ export function HomePage() {
         </div>
 
         {/* FAB */}
-        <Button
-          size="icon"
-          className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg"
-          onClick={() => navigate("/receipts/add")}
-        >
+        <FloatingActionButton onClick={() => navigate("/receipts/add")}>
           <Plus className="h-6 w-6" />
-        </Button>
+        </FloatingActionButton>
       </div>
     );
   }
@@ -174,8 +171,7 @@ export function HomePage() {
               return (
                 <Card
                   key={receipt.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => navigate(`/receipts/${receipt.id}`)}
+                  className="hover:shadow-md transition-shadow"
                 >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
@@ -205,13 +201,9 @@ export function HomePage() {
       </div>
 
       {/* FAB（追加ボタン） */}
-      <Button
-        size="icon"
-        className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg"
-        onClick={() => navigate("/receipts/add")}
-      >
+      <FloatingActionButton onClick={() => navigate("/receipts/add")}>
         <Plus className="h-6 w-6" />
-      </Button>
+      </FloatingActionButton>
     </div>
   );
 }

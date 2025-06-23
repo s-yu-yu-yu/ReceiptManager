@@ -45,7 +45,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   const videoConstraints = {
     width: { ideal: 1080 },
     height: { ideal: 1920 }, // 縦長（9:16）でレシート撮影に最適
-    aspectRatio: 9/16,
+    aspectRatio: 9 / 16,
     facingMode: "environment", // 背面カメラを優先
   };
 

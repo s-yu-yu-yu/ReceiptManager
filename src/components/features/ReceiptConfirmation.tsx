@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { type AnalyzedReceipt } from "@/lib/gemini";
 import { type Receipt, type ReceiptItem } from "@/types";
+import { getCategoryNames } from "@/lib/categories";
 
 interface ReceiptConfirmationProps {
   analyzedData: AnalyzedReceipt;
@@ -22,14 +23,7 @@ interface ReceiptConfirmationProps {
   isLoading?: boolean;
 }
 
-const CATEGORIES = [
-  "食品",
-  "日用品",
-  "衣類",
-  "医薬品",
-  "書籍・文房具",
-  "その他",
-];
+const CATEGORIES = getCategoryNames();
 
 export const ReceiptConfirmation: React.FC<ReceiptConfirmationProps> = ({
   analyzedData,

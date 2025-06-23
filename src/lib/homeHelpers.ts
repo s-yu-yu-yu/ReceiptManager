@@ -65,12 +65,6 @@ export async function getRecentReceipts(limit: number = 3): Promise<Receipt[]> {
   }
 }
 
-/**
- * 今日の日付を取得（YYYY-MM-DD形式）
- */
-export function getTodayString(): string {
-  return new Date().toISOString().split("T")[0];
-}
 
 /**
  * 月表示用の文字列を取得
