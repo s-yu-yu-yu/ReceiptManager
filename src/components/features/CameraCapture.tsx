@@ -43,15 +43,16 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   }, []);
 
   const videoConstraints = {
-    width: { ideal: 1280 },
-    height: { ideal: 720 },
+    width: { ideal: 1080 },
+    height: { ideal: 1920 }, // 縦長（9:16）でレシート撮影に最適
+    aspectRatio: 9/16,
     facingMode: "environment", // 背面カメラを優先
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardContent className="p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-sm max-h-[85vh] overflow-y-auto">
+        <CardContent className="p-4 pb-6">
           <div className="relative">
             {/* カメラヘッダー */}
             <div className="flex justify-between items-center mb-4">
@@ -67,23 +68,31 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
             </div>
 
             {/* カメラビュー */}
-            <div className="relative bg-gray-100 rounded-lg overflow-hidden">
+            <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-[3/4]">
               {!capturedImage ? (
                 <>
                   <Webcam
                     ref={webcamRef}
                     audio={false}
                     screenshotFormat="image/jpeg"
+                    screenshotQuality={0.95}
                     videoConstraints={videoConstraints}
                     onUserMedia={handleUserMedia}
-                    className="w-full h-64 object-cover"
+                    className="w-full h-full object-cover"
                   />
 
                   {/* ガイド枠 */}
-                  <div className="absolute inset-4 border-2 border-white border-dashed rounded-lg pointer-events-none">
-                    <div className="absolute top-2 left-2 text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
-                      レシートをこの枠内に収めてください
+                  <div className="absolute inset-6 border-2 border-white border-dashed rounded-lg pointer-events-none">
+                    <div className="absolute -top-8 left-0 right-0 text-center">
+                      <span className="text-white text-sm bg-black bg-opacity-60 px-3 py-1 rounded-full">
+                        📄 レシート全体を枠内に収めてください
+                      </span>
                     </div>
+                    {/* コーナーマーカー */}
+                    <div className="absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2 border-white"></div>
+                    <div className="absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2 border-white"></div>
+                    <div className="absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2 border-white"></div>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 border-white"></div>
                   </div>
 
                   {/* カメラ準備中の表示 */}
@@ -100,13 +109,13 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
                 <img
                   src={capturedImage}
                   alt="Captured receipt"
-                  className="w-full h-64 object-cover"
+                  className="w-full h-full object-cover"
                 />
               )}
             </div>
 
             {/* 操作ボタン */}
-            <div className="flex justify-center space-x-4 mt-6">
+            <div className="flex justify-center space-x-4 mt-4">
               {!capturedImage ? (
                 <Button
                   onClick={capture}

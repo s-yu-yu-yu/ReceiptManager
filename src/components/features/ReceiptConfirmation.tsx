@@ -109,7 +109,7 @@ export const ReceiptConfirmation: React.FC<ReceiptConfirmationProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto pb-24">
         {/* ヘッダー */}
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" onClick={onBack} className="text-gray-600">
@@ -289,12 +289,12 @@ export const ReceiptConfirmation: React.FC<ReceiptConfirmationProps> = ({
           </CardContent>
         </Card>
 
-        {/* 保存ボタン */}
-        <div className="flex justify-center pb-6">
+        {/* 保存ボタン - 画面下部固定 */}
+        <div className="sticky bottom-0 bg-background border-t p-4 mt-6">
           <Button
             onClick={handleSave}
             disabled={isLoading || !storeName.trim() || items.length === 0}
-            className="w-full max-w-md"
+            className="w-full max-w-md mx-auto"
             size="lg"
           >
             <Save size={20} className="mr-2" />

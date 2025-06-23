@@ -95,9 +95,9 @@ export function optimizeScreenshot(
   options: ImageResizeOptions = {}
 ): Promise<string> {
   return resizeImageToBase64(screenshotDataUrl, {
-    maxWidth: 1024,
-    maxHeight: 768,
-    quality: 0.8,
+    maxWidth: 1440, // レシート撮影用に高解像度に変更
+    maxHeight: 1920, // 縦長レシートに対応
+    quality: 0.9, // 高画質に設定
     format: 'jpeg',
     ...options
   });
