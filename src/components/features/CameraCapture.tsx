@@ -74,8 +74,8 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
                   <Webcam
                     ref={webcamRef}
                     audio={false}
-                    screenshotFormat="image/jpeg"
-                    screenshotQuality={0.95}
+                    screenshotFormat="image/png"
+                    screenshotQuality={1.0}
                     videoConstraints={videoConstraints}
                     onUserMedia={handleUserMedia}
                     className="w-full h-full object-cover"

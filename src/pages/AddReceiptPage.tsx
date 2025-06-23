@@ -37,7 +37,7 @@ export default function AddReceiptPage() {
 
     try {
       // 元画像をそのまま使用（品質劣化を防ぐ）
-      const capturedImageUrl = `data:image/jpeg;base64,${imageBase64}`;
+      const capturedImageUrl = `data:image/png;base64,${imageBase64}`;
       setCapturedImage(capturedImageUrl);
 
       // Gemini AIで解析（元画像のBase64データを使用）
