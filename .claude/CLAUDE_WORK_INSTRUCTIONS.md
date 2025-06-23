@@ -5,70 +5,84 @@
 ### 環境構築
 ```bash
 # Reactプロジェクトの初期化（Vite使用）
-npm create vite@latest receipt-manager -- --template react-ts
+bun create vite@latest receipt-manager -- --template react-ts
 cd receipt-manager
 
-# 必要なパッケージのインストール
-npm install -D tailwindcss postcss autoprefixer
-npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-label @radix-ui/react-select @radix-ui/react-slot @radix-ui/react-tabs
-npm install class-variance-authority clsx tailwind-merge lucide-react
-npm install zustand dexie recharts react-webcam
-npm install @google/generative-ai
-npm install react-router-dom
+# パッケージマネージャをbunに移行
+bun install
 
-# Tailwind CSS初期化
-npx tailwindcss init -p
+# 必要なパッケージのインストール
+bun add @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-label @radix-ui/react-select @radix-ui/react-slot @radix-ui/react-tabs
+bun add class-variance-authority clsx tailwind-merge lucide-react
+bun add zustand dexie recharts react-webcam
+bun add @google/genai  # 最新のGemini APIライブラリ
+bun add react-router-dom
+bun add @tailwindcss/vite  # Tailwind CSS v4用
+
+# shadcn/ui初期化
+bunx shadcn@latest init
+bunx shadcn@latest add button card label input select
 ```
 
-## Phase 1: 基本機能実装（2週間）
+### ✅ 実装完了状況
+- **Phase 1**: ✅ 完了（基本機能実装）
+- **Phase 2**: ✅ 完了（AI連携機能）
+- **Phase 3**: 🔄 未実装（分析機能）
+- **Phase 4**: 🔄 未実装（拡張機能）
 
-### タスク1: プロジェクトセットアップ
+## Phase 1: 基本機能実装 ✅ 完了
+
+### ✅ タスク1: プロジェクトセットアップ
 
 1. **Tailwind設定**
-   - `tailwind.config.js`を更新してshadcn/ui対応
-   - `src/index.css`にTailwindディレクティブ追加
+   - ✅ Tailwind CSS v4対応（@tailwindcss/vite使用）
+   - ✅ `src/index.css`にTailwindディレクティブ追加
+   - ✅ postcss.config.js不要（Tailwind v4の新機能）
 
 2. **shadcn/ui初期化**
-   ```bash
-   npx shadcn-ui@latest init
-   ```
+   - ✅ shadcn/ui設定完了
+   - ✅ button, card, label, input, selectコンポーネント追加
 
 3. **プロジェクト構造作成**
    ```
    src/
    ├── components/
-   │   ├── ui/          # shadcn/uiコンポーネント
-   │   ├── layout/      # レイアウトコンポーネント
-   │   └── features/    # 機能別コンポーネント
+   │   ├── ui/          # ✅ shadcn/uiコンポーネント
+   │   ├── layout/      # ✅ レイアウトコンポーネント
+   │   └── features/    # ✅ 機能別コンポーネント
    ├── lib/
-   │   ├── db.ts        # IndexedDB設定
-   │   └── utils.ts     # ユーティリティ関数
-   ├── stores/          # Zustand stores
-   ├── types/           # TypeScript型定義
-   └── pages/           # ページコンポーネント
+   │   ├── db.ts        # ✅ IndexedDB設定
+   │   ├── utils.ts     # ✅ ユーティリティ関数
+   │   ├── gemini.ts    # ✅ Gemini AI API
+   │   └── imageUtils.ts # ✅ 画像処理ユーティリティ
+   ├── stores/          # 🔄 Zustand stores（未使用）
+   ├── types/           # ✅ TypeScript型定義
+   └── pages/           # ✅ ページコンポーネント
    ```
 
-### タスク2: 基本UI構築
+### ✅ タスク2: 基本UI構築
 
 1. **底部ナビゲーション作成**
-   - `src/components/layout/BottomNavigation.tsx`
-   - Home、BarChart、Receipt、Settings のアイコン使用
+   - ✅ `src/components/layout/BottomNavigation.tsx`実装完了
+   - ✅ Home、BarChart、Receipt、Settings のアイコン使用
+   - ✅ React Routerによるページ遷移
 
 2. **ページルーティング設定**
-   - `src/App.tsx`でReact Router設定
-   - 各ページのスケルトン作成
+   - ✅ `src/App.tsx`でReact Router設定完了
+   - ✅ 全ページスケルトン作成済み
+   - ✅ `/receipts/add`ルート追加
 
 3. **ホーム画面実装**
-   - 今月の合計額表示
-   - 本日の支出カード
-   - 最近のレシート一覧
-   - FAB（追加ボタン）
+   - ✅ 今月の合計額表示（モックデータ）
+   - ✅ 本日の支出カード
+   - ✅ 最近のレシート一覧（モックデータ）
+   - ✅ FAB（追加ボタン）- レシート追加ページへ遷移
 
-### タスク3: IndexedDBセットアップ
+### ✅ タスク3: IndexedDBセットアップ
 
-1. **Dexie.js設定**（`src/lib/db.ts`）
+1. **Dexie.js設定完了**（`src/lib/db.ts`）
    ```typescript
-   import Dexie, { Table } from 'dexie';
+   import Dexie, { type Table } from "dexie";
    
    export interface Receipt {
      id?: string;
@@ -84,95 +98,121 @@ npx tailwindcss init -p
    export interface ReceiptItem {
      id: string;
      name: string;
-     category?: string;
      quantity: number;
      unitPrice: number;
      totalPrice: number;
+     category?: string;
    }
    
-   class ReceiptDatabase extends Dexie {
+   export class ReceiptDatabase extends Dexie {
      receipts!: Table<Receipt>;
-     
+     receiptItems!: Table<ReceiptItem>;
+     categories!: Table<Category>;
+     monthlyBudgets!: Table<MonthlyBudget>;
+     settings!: Table<Settings>;
+   
      constructor() {
-       super('ReceiptManagerDB');
+       super("ReceiptDatabase");
        this.version(1).stores({
-         receipts: '++id, date, storeName, totalAmount, createdAt'
+         receipts: "id, date, storeName, totalAmount, createdAt",
+         receiptItems: "++id, receiptId, name, category",
+         categories: "++id, name, order",
+         monthlyBudgets: "++id, yearMonth, categoryId",
+         settings: "++id, key",
        });
      }
    }
    
    export const db = new ReceiptDatabase();
    ```
+   - ✅ 5つのテーブル定義完了
+   - ✅ 初期カテゴリデータ自動投入機能
+   - ✅ 型安全なデータベース操作
 
-2. **Zustandストア作成**（`src/stores/receiptStore.ts`）
+2. **Zustandストア**
+   - 🔄 未実装（現在はIndexedDB直接操作）
 
-### タスク4: レシート手動入力機能
+### 🔄 タスク4: レシート手動入力機能（Phase 2で統合実装）
 
-1. **入力フォーム作成**
-   - 店舗名、日付入力
-   - 品目追加・削除機能
-   - 合計金額自動計算
+- 📝 手動入力機能は後日実装予定
+- ✅ AI連携版のレシート確認・編集フォームで代替実装済み
 
-2. **バリデーション実装**
-   - 必須項目チェック
-   - 金額の妥当性確認
+## Phase 2: AI連携 ✅ 完了
 
-## Phase 2: AI連携（1週間）
-
-### タスク1: Gemini AI API統合
+### ✅ タスク1: Gemini AI API統合
 
 1. **環境変数設定**
-   - `.env.local`作成
-   - `VITE_GEMINI_API_KEY`設定
+   - ✅ `.env.local`作成済み
+   - ✅ `VITE_GEMINI_API_KEY`設定済み
 
 2. **API呼び出し関数作成**（`src/lib/gemini.ts`）
    ```typescript
-   import { GoogleGenerativeAI } from '@google/generative-ai';
+   import { GoogleGenAI } from "@google/genai";
    
-   const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+   const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
    
-   export async function analyzeReceipt(imageBase64: string) {
-     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-     
-     const prompt = `レシート画像から以下の情報を抽出してください：
-     - 店舗名
-     - 購入日
-     - 各商品（名前、数量、単価、合計）
-     - 合計金額
-     
-     JSON形式で返してください。`;
-     
-     const result = await model.generateContent([
-       prompt,
-       {
-         inlineData: {
-           mimeType: "image/jpeg",
-           data: imageBase64
-         }
-       }
-     ]);
-     
-     return JSON.parse(result.response.text());
+   export async function analyzeReceipt(imageBase64: string): Promise<AnalyzedReceipt> {
+     const response = await ai.models.generateContent({
+       model: "gemini-2.5-flash",
+       contents: [
+         {
+           parts: [
+             { text: prompt },
+             {
+               inlineData: {
+                 mimeType: "image/jpeg",
+                 data: imageBase64,
+               },
+             },
+           ],
+         },
+       ],
+     });
+     // レスポンス処理とデータ検証
    }
    ```
+   - ✅ 最新の`@google/genai`ライブラリ使用
+   - ✅ `gemini-2.5-flash`モデル使用
+   - ✅ 詳細なプロンプトエンジニアリング
+   - ✅ エラーハンドリングと型安全性
 
-### タスク2: カメラ機能実装
+### ✅ タスク2: カメラ機能実装
 
 1. **カメラコンポーネント作成**（`src/components/features/CameraCapture.tsx`）
-   - react-webcam使用
-   - ガイド枠表示
-   - 撮影・再撮影機能
+   - ✅ react-webcam使用
+   - ✅ レシート撮影用ガイド枠表示
+   - ✅ 撮影・再撮影・確定機能
+   - ✅ 背面カメラ優先設定
+   - ✅ カメラ準備中表示
+   - ✅ 解析中のローディング表示
 
-2. **画像処理**
-   - Canvas APIで画像リサイズ
-   - Base64エンコード
+2. **画像処理**（`src/lib/imageUtils.ts`）
+   - ✅ Canvas APIで画像リサイズ
+   - ✅ Base64エンコード処理
+   - ✅ 画像最適化（1024x768、品質80%）
+   - ✅ ファイルサイズチェック機能
+   - ✅ 縦横比保持リサイズ
 
-### タスク3: レシート読み取り処理
+### ✅ タスク3: レシート読み取り処理
 
-1. **読み取り結果確認画面**
-   - AI解析結果表示
-   - 編集可能なフォーム
-   - 保存前の確認
+1. **読み取り結果確認画面**（`src/components/features/ReceiptConfirmation.tsx`）
+   - ✅ AI解析結果表示
+   - ✅ 信頼度による警告表示
+   - ✅ 編集可能なフォーム（店舗名、日付、商品詳細）
+   - ✅ 商品の追加・削除機能
+   - ✅ 単価×数量の自動計算
+   - ✅ カテゴリ選択（6種類）
+   - ✅ 合計金額の自動計算
+   - ✅ バリデーション機能
+   - ✅ IndexedDBへの保存
+
+2. **統合フロー**（`src/pages/AddReceiptPage.tsx`）
+   - ✅ 撮影方法選択
+   - ✅ カメラ撮影
+   - ✅ AI解析
+   - ✅ 結果確認・編集
+   - ✅ データ保存
+   - ✅ ホーム画面へ戻る
 
 ## Phase 3: 分析機能（1週間）
 
@@ -273,35 +313,46 @@ npx tailwindcss init -p
 
 ```bash
 # 開発サーバー起動
-npm run dev
+bun dev
 
 # ビルド
-npm run build
+bun run build
 
 # プレビュー
-npm run preview
-
-# 型チェック
-npm run type-check
+bun run preview
 
 # リント
-npm run lint
+bun run lint
 ```
 
 ## トラブルシューティング
 
 ### よくある問題
 1. **Gemini API エラー**
-   - APIキーの確認
+   - ✅ APIキーの確認（.env.localに設定）
+   - ✅ 最新ライブラリ@google/genai使用
+   - ✅ gemini-2.5-flashモデル使用
    - クォータ制限の確認
    - CORS設定
 
 2. **IndexedDB エラー**
-   - ブラウザ互換性
+   - ✅ Dexie.js使用で互換性確保
+   - ✅ 型安全なスキーマ定義
    - ストレージ容量
    - 同期処理の競合
 
 3. **カメラアクセス**
-   - HTTPS必須
-   - 権限設定
+   - ✅ HTTPS必須（開発時はlocalhostで可能）
+   - ✅ react-webcam使用で権限管理
+   - ✅ 背面カメラ優先設定
    - デバイス互換性
+
+4. **パッケージ管理**
+   - ✅ bunパッケージマネージャ使用
+   - ✅ package-lock.json削除済み
+   - ✅ bun.lockb使用
+
+5. **Tailwind CSS v4**
+   - ✅ @tailwindcss/vite使用
+   - ✅ postcss.config.js不要
+   - ✅ 最新の設定対応済み
