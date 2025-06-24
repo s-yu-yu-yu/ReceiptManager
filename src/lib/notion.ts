@@ -1,8 +1,7 @@
+import { Client } from "@notionhq/client";
 import type { Receipt, ReceiptItem } from "@/types";
 
 // 定数
-const NOTION_API_VERSION = "2022-06-28";
-const NOTION_BASE_URL = "https://api.notion.com/v1";
 const DEFAULT_PLACEHOLDER_KEYS = {
   API_KEY: "your_notion_api_key_here",
   RECEIPTS_DB: "your_receipts_database_id_here",
@@ -26,10 +25,16 @@ const getEnvValue = (
   if (key === "VITE_NOTION_API_KEY" && tempNotionConfig.apiKey) {
     return tempNotionConfig.apiKey;
   }
-  if (key === "VITE_NOTION_RECEIPTS_DATABASE_ID" && tempNotionConfig.receiptsDatabaseId) {
+  if (
+    key === "VITE_NOTION_RECEIPTS_DATABASE_ID" &&
+    tempNotionConfig.receiptsDatabaseId
+  ) {
     return tempNotionConfig.receiptsDatabaseId;
   }
-  if (key === "VITE_NOTION_ITEMS_DATABASE_ID" && tempNotionConfig.itemsDatabaseId) {
+  if (
+    key === "VITE_NOTION_ITEMS_DATABASE_ID" &&
+    tempNotionConfig.itemsDatabaseId
+  ) {
     return tempNotionConfig.itemsDatabaseId;
   }
 
@@ -76,40 +81,17 @@ export const getItemsDatabaseId = (): string =>
     "Notion商品データベースIDが設定されていません"
   );
 
-// Notion APIリクエストのヘルパー
-const notionRequest = async (
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<unknown> => {
+// Notion クライアントの作成
+const createNotionClient = (): Client => {
   const apiKey = getNotionApiKey();
+  console.log(
+    "Notion client 作成:",
+    apiKey ? `${apiKey.substring(0, 10)}...` : "APIキーなし"
+  );
 
-  console.log(`Notion API Request: ${options.method || "GET"} ${endpoint}`);
-
-  const response = await fetch(`${NOTION_BASE_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "Notion-Version": NOTION_API_VERSION,
-      ...options.headers,
-    },
+  return new Client({
+    auth: apiKey,
   });
-
-  console.log(`Notion API Response: ${response.status} ${response.statusText}`);
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    console.error("Notion API Error Response:", errorData);
-    throw new Error(
-      `Notion API Error: ${response.status} ${
-        response.statusText
-      } - ${JSON.stringify(errorData)}`
-    );
-  }
-
-  const responseData = await response.json();
-  console.log("Notion API Success Response:", responseData);
-  return responseData;
 };
 
 // Notionページプロパティ作成のヘルパー（公式SDK準拠）
@@ -184,15 +166,20 @@ const createItemProperties = (item: ReceiptItem, receiptPageId: string) => ({
 });
 
 // データベース情報を取得
-export const getDatabase = async (databaseId: string) =>
-  notionRequest(`/databases/${databaseId}`);
+export const getDatabase = async (databaseId: string) => {
+  const notion = createNotionClient();
+  console.log("データベース取得:", databaseId);
+  return await notion.databases.retrieve({ database_id: databaseId });
+};
 
 // ページを作成
-export const createPage = async (payload: Record<string, unknown>) =>
-  notionRequest("/pages", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+export const createPage = async (payload: Record<string, unknown>) => {
+  const notion = createNotionClient();
+  console.log("ページ作成:", JSON.stringify(payload, null, 2));
+  return await notion.pages.create(
+    payload as Parameters<typeof notion.pages.create>[0]
+  );
+};
 
 // 商品アイテムをNotionに同期
 export const syncItemsToNotion = async (
@@ -280,12 +267,12 @@ export const isNotionEnabled = (): boolean => {
 // 接続テスト（簡易版 - 設定値のみチェック）
 export const testNotionConnection = async (): Promise<boolean> => {
   console.log("testNotionConnection 開始");
-  
+
   try {
     console.log("環境確認:", {
       isDev: import.meta.env.DEV,
       mode: import.meta.env.MODE,
-      prod: import.meta.env.PROD
+      prod: import.meta.env.PROD,
     });
 
     // 開発環境では設定値のみチェック
@@ -293,7 +280,7 @@ export const testNotionConnection = async (): Promise<boolean> => {
       console.warn(
         "開発環境ではCORS制限により実際のAPI接続テストはスキップします。設定値のみチェックします。"
       );
-      
+
       try {
         // 設定値の検証
         console.log("設定値取得開始");
@@ -303,7 +290,7 @@ export const testNotionConnection = async (): Promise<boolean> => {
         console.log("レシートDB ID取得成功");
         const itemsDbId = getItemsDatabaseId();
         console.log("商品DB ID取得成功");
-        
+
         console.log("設定確認:");
         console.log(
           "- API Key:",
@@ -311,7 +298,7 @@ export const testNotionConnection = async (): Promise<boolean> => {
         );
         console.log("- Receipts DB ID:", receiptsDbId);
         console.log("- Items DB ID:", itemsDbId);
-        
+
         return true; // 開発環境では設定があれば成功とする
       } catch (configError) {
         console.error("設定値取得エラー:", configError);
@@ -321,34 +308,33 @@ export const testNotionConnection = async (): Promise<boolean> => {
 
     // 本番環境では実際のAPI接続テスト
     console.log("本番環境でのAPI接続テスト開始");
-    
+
     try {
       const receiptsDbId = getReceiptsDatabaseId();
       const itemsDbId = getItemsDatabaseId();
-      
+
       console.log("データベース接続テスト開始");
       console.log("レシートDB:", receiptsDbId);
       console.log("商品DB:", itemsDbId);
-      
+
       const results = await Promise.all([
         getDatabase(receiptsDbId),
         getDatabase(itemsDbId),
       ]);
-      
+
       console.log("データベース接続テスト成功:", results);
       return true;
     } catch (apiError) {
       console.error("API接続エラー:", apiError);
       throw apiError;
     }
-
   } catch (error) {
     console.error("testNotionConnection エラー詳細:", {
       error: error,
       message: error instanceof Error ? error.message : "不明なエラー",
       stack: error instanceof Error ? error.stack : "スタック情報なし",
       type: typeof error,
-      constructor: error?.constructor?.name
+      constructor: error?.constructor?.name,
     });
 
     if (error instanceof Error) {
