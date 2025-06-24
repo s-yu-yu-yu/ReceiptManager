@@ -8,6 +8,7 @@ import { analyzeReceipt, type AnalyzedReceipt } from "@/lib/gemini";
 import { db } from "@/lib/db";
 import { type Receipt } from "@/types";
 import { useNavigate } from "react-router-dom";
+import { isNotionEnabled, syncReceiptToNotion } from "@/lib/notion";
 
 type Step = "method-selection" | "camera" | "confirmation";
 
@@ -70,6 +71,18 @@ export default function AddReceiptPage() {
       };
 
       await db.receipts.add(receipt);
+
+      // Notion連携が有効な場合、Notionに同期
+      if (isNotionEnabled()) {
+        try {
+          await syncReceiptToNotion(receipt);
+          console.log("Notionへの同期が完了しました");
+        } catch (notionError) {
+          // Notion同期エラーは警告として扱い、ローカル保存は成功として処理
+          console.error("Notion同期エラー:", notionError);
+          // 必要に応じてユーザーに通知する処理を追加
+        }
+      }
 
       // 成功時はホーム画面に戻る
       navigate("/", { replace: true });

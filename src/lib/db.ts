@@ -25,24 +25,28 @@ class ReceiptDatabase extends Dexie {
       settings: "++id, key",
     });
   }
+
+  async initializeCategories() {
+    const count = await this.categories.count();
+    if (count === 0) {
+      // デフォルトカテゴリを追加
+      await this.categories.bulkAdd([
+        { name: "食費", icon: "🍽️", color: "#FF6B6B", order: 1 },
+        { name: "日用品", icon: "🧴", color: "#4ECDC4", order: 2 },
+        { name: "交通費", icon: "🚃", color: "#45B7D1", order: 3 },
+        { name: "外食", icon: "🍴", color: "#F7DC6F", order: 4 },
+        { name: "娯楽", icon: "🎮", color: "#BB8FCE", order: 5 },
+        { name: "医療費", icon: "🏥", color: "#85C1E2", order: 6 },
+        { name: "衣服", icon: "👕", color: "#F8B739", order: 7 },
+        { name: "その他", icon: "📦", color: "#95A5A6", order: 8 },
+      ]);
+    }
+  }
 }
 
 export const db = new ReceiptDatabase();
 
 // 初期カテゴリデータの投入
 export async function initializeDatabase() {
-  const count = await db.categories.count();
-  if (count === 0) {
-    // デフォルトカテゴリを追加
-    await db.categories.bulkAdd([
-      { name: "食費", icon: "🍽️", color: "#FF6B6B", order: 1 },
-      { name: "日用品", icon: "🧴", color: "#4ECDC4", order: 2 },
-      { name: "交通費", icon: "🚃", color: "#45B7D1", order: 3 },
-      { name: "外食", icon: "🍴", color: "#F7DC6F", order: 4 },
-      { name: "娯楽", icon: "🎮", color: "#BB8FCE", order: 5 },
-      { name: "医療費", icon: "🏥", color: "#85C1E2", order: 6 },
-      { name: "衣服", icon: "👕", color: "#F8B739", order: 7 },
-      { name: "その他", icon: "📦", color: "#95A5A6", order: 8 },
-    ]);
-  }
+  await db.initializeCategories();
 }

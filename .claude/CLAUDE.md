@@ -23,6 +23,7 @@ Receipt Manager は、レシート画像を AI（Gemini API）で解析し、家
 
 - **ローカル DB**: Dexie (IndexedDB wrapper)
 - **AI 解析**: Google Gemini API (@google/genai)
+- **外部連携**: Notion API (@notionhq/client)
 
 ### 開発ツール
 
@@ -52,6 +53,7 @@ Receipt Manager は、レシート画像を AI（Gemini API）で解析し、家
 ├── lib/                # ユーティリティ
 │   ├── db.ts          # Dexie データベース設定
 │   ├── gemini.ts      # Gemini API連携
+│   ├── notion.ts      # Notion API連携
 │   ├── categories.ts  # カテゴリ一元管理
 │   ├── homeHelpers.ts # ホーム画面用データ集計
 │   └── utils.ts       # 汎用ユーティリティ
@@ -100,6 +102,13 @@ Receipt Manager は、レシート画像を AI（Gemini API）で解析し、家
 - **月別集計**: カテゴリ別支出統計
 - **チャート表示**: Recharts による視覚的な分析
 - **予算管理**: カテゴリ別予算設定と実績比較
+
+### 5. Notion連携機能
+
+- **自動同期**: 新規レシート保存時にNotionへ自動同期
+- **一括同期**: 既存レシートの一括Notion同期
+- **接続テスト**: API設定の検証機能
+- **エラーハンドリング**: 同期失敗時の適切な処理
 
 ## データベース設計
 
@@ -178,6 +187,8 @@ bun run preview
 
 ```env
 VITE_GEMINI_API_KEY=your_gemini_api_key
+VITE_NOTION_API_KEY=your_notion_api_key
+VITE_NOTION_RECEIPTS_DATABASE_ID=your_database_id
 ```
 
 ## 設定ファイル
