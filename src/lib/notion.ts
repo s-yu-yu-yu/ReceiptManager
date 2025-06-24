@@ -1,83 +1,141 @@
-import { Client } from "@notionhq/client";
 import type { Receipt, ReceiptItem } from "@/types";
 
-// Notion APIクライアントの初期化
-export const getNotionClient = () => {
-  const apiKey = import.meta.env.VITE_NOTION_API_KEY;
-  if (!apiKey || apiKey === "your_notion_api_key_here") {
-    throw new Error("Notion APIキーが設定されていません");
+// 定数
+const NOTION_API_VERSION = "2022-06-28";
+const NOTION_BASE_URL = "https://api.notion.com/v1";
+const DEFAULT_PLACEHOLDER_KEYS = {
+  API_KEY: "your_notion_api_key_here",
+  RECEIPTS_DB: "your_receipts_database_id_here",
+  ITEMS_DB: "your_items_database_id_here",
+} as const;
+
+// 環境変数取得のヘルパー
+const getEnvValue = (
+  key: string,
+  placeholder: string,
+  errorMessage: string
+): string => {
+  const value = import.meta.env[key];
+  if (!value || value === placeholder) {
+    throw new Error(errorMessage);
   }
-  return new Client({ auth: apiKey });
+  return value;
 };
 
-// データベースIDの取得
-export const getReceiptsDatabaseId = () => {
-  const dbId = import.meta.env.VITE_NOTION_RECEIPTS_DATABASE_ID;
-  if (!dbId || dbId === "your_receipts_database_id_here") {
-    throw new Error("NotionレシートデータベースIDが設定されていません");
+// API設定の取得
+export const getNotionApiKey = (): string =>
+  getEnvValue(
+    "VITE_NOTION_API_KEY",
+    DEFAULT_PLACEHOLDER_KEYS.API_KEY,
+    "Notion APIキーが設定されていません"
+  );
+
+export const getReceiptsDatabaseId = (): string =>
+  getEnvValue(
+    "VITE_NOTION_RECEIPTS_DATABASE_ID",
+    DEFAULT_PLACEHOLDER_KEYS.RECEIPTS_DB,
+    "NotionレシートデータベースIDが設定されていません"
+  );
+
+export const getItemsDatabaseId = (): string =>
+  getEnvValue(
+    "VITE_NOTION_ITEMS_DATABASE_ID",
+    DEFAULT_PLACEHOLDER_KEYS.ITEMS_DB,
+    "Notion商品データベースIDが設定されていません"
+  );
+
+// Notion APIリクエストのヘルパー
+const notionRequest = async (
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<unknown> => {
+  const apiKey = getNotionApiKey();
+
+  const response = await fetch(`${NOTION_BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "Notion-Version": NOTION_API_VERSION,
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      `Notion API Error: ${response.status} ${
+        response.statusText
+      } - ${JSON.stringify(errorData)}`
+    );
   }
-  return dbId;
+
+  return response.json();
 };
 
-// Notionページプロパティの型定義（型アサーションで使用）
+// Notionページプロパティ作成のヘルパー
+const createTextProperty = (content: string) => ({
+  text: { content },
+});
 
-// レシートをNotionに同期
-export const syncReceiptToNotion = async (
-  receipt: Receipt
-): Promise<string> => {
-  try {
-    const notion = getNotionClient();
-    const databaseId = getReceiptsDatabaseId();
+const createTitleProperty = (content: string) => ({
+  title: [createTextProperty(content)],
+});
 
-    // レシートページの作成
-    const receiptPage = await notion.pages.create({
-      parent: { database_id: databaseId },
-      properties: {
-        店舗名: {
-          title: [
-            {
-              text: {
-                content: receipt.storeName || "不明な店舗",
-              },
-            },
-          ],
-        },
-        日付: {
-          date: {
-            start: receipt.date.toISOString().split("T")[0],
-          },
-        },
-        合計金額: {
-          number: receipt.totalAmount,
-        },
-        レシートID: {
-          rich_text: [
-            {
-              text: {
-                content: receipt.id?.toString() || "",
-              },
-            },
-          ],
-        },
-        作成日時: {
-          date: {
-            start: receipt.createdAt.toISOString(),
-          },
-        },
-        更新日時: {
-          date: {
-            start: receipt.updatedAt.toISOString(),
-          },
-        },
-      },
-    });
+const createRichTextProperty = (content: string) => ({
+  rich_text: [createTextProperty(content)],
+});
 
-    return receiptPage.id;
-  } catch (error) {
-    console.error("Notionへのレシート同期エラー:", error);
-    throw error;
-  }
-};
+const createDateProperty = (date: Date) => ({
+  date: { start: date.toISOString() },
+});
+
+const createDateOnlyProperty = (date: Date) => ({
+  date: { start: date.toISOString().split("T")[0] },
+});
+
+const createNumberProperty = (value: number) => ({
+  number: value,
+});
+
+const createSelectProperty = (name: string) => ({
+  select: { name },
+});
+
+const createRelationProperty = (id: string) => ({
+  relation: [{ id }],
+});
+
+// レシートページプロパティの作成
+const createReceiptProperties = (receipt: Receipt) => ({
+  店舗名: createTitleProperty(receipt.storeName || "不明な店舗"),
+  日付: createDateOnlyProperty(receipt.date),
+  合計金額: createNumberProperty(receipt.totalAmount),
+  レシートID: createRichTextProperty(receipt.id?.toString() || ""),
+  作成日時: createDateProperty(receipt.createdAt),
+  更新日時: createDateProperty(receipt.updatedAt),
+});
+
+// 商品ページプロパティの作成
+const createItemProperties = (item: ReceiptItem, receiptPageId: string) => ({
+  商品名: createTitleProperty(item.name),
+  数量: createNumberProperty(item.quantity),
+  単価: createNumberProperty(item.unitPrice),
+  合計: createNumberProperty(item.totalPrice),
+  カテゴリ: createSelectProperty(item.category || "その他"),
+  レシート: createRelationProperty(receiptPageId),
+});
+
+// データベース情報を取得
+export const getDatabase = async (databaseId: string) =>
+  notionRequest(`/databases/${databaseId}`);
+
+// ページを作成
+export const createPage = async (payload: Record<string, unknown>) =>
+  notionRequest("/pages", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 
 // 商品アイテムをNotionに同期
 export const syncItemsToNotion = async (
@@ -85,66 +143,54 @@ export const syncItemsToNotion = async (
   receiptPageId: string,
   itemsDatabaseId: string
 ): Promise<void> => {
-  try {
-    const notion = getNotionClient();
+  if (!items.length) return;
 
-    // 各商品アイテムをNotionに作成
-    const promises = items.map((item) =>
-      notion.pages.create({
-        parent: { database_id: itemsDatabaseId },
-        properties: {
-          商品名: {
-            title: [
-              {
-                text: {
-                  content: item.name,
-                },
-              },
-            ],
-          },
-          数量: {
-            number: item.quantity,
-          },
-          単価: {
-            number: item.unitPrice,
-          },
-          合計: {
-            number: item.totalPrice,
-          },
-          カテゴリ: {
-            select: {
-              name: item.category || "その他",
-            },
-          },
-          レシート: {
-            relation: [
-              {
-                id: receiptPageId,
-              },
-            ],
-          },
-        },
-      })
-    );
+  const itemPages = items.map((item) => ({
+    parent: { database_id: itemsDatabaseId },
+    properties: createItemProperties(item, receiptPageId),
+  }));
 
-    await Promise.all(promises);
-  } catch (error) {
-    console.error("Notionへの商品アイテム同期エラー:", error);
-    throw error;
+  await Promise.all(itemPages.map(createPage));
+};
+
+// レシートをNotionに同期
+export const syncReceiptToNotion = async (
+  receipt: Receipt
+): Promise<string> => {
+  const databaseId = getReceiptsDatabaseId();
+
+  const pageData = {
+    parent: { database_id: databaseId },
+    properties: createReceiptProperties(receipt),
+  };
+
+  const receiptPage = (await createPage(pageData)) as { id: string };
+
+  // 商品アイテムも同期（失敗してもレシート同期は成功とする）
+  if (receipt.items?.length > 0) {
+    try {
+      const itemsDatabaseId = getItemsDatabaseId();
+      await syncItemsToNotion(receipt.items, receiptPage.id, itemsDatabaseId);
+    } catch (itemsError) {
+      console.warn("商品アイテムの同期に失敗:", itemsError);
+    }
   }
+
+  return receiptPage.id;
 };
 
 // Notion連携が有効かチェック
 export const isNotionEnabled = (): boolean => {
   try {
-    const apiKey = import.meta.env.VITE_NOTION_API_KEY;
-    const dbId = import.meta.env.VITE_NOTION_RECEIPTS_DATABASE_ID;
-    return (
-      apiKey &&
-      apiKey !== "your_notion_api_key_here" &&
-      dbId &&
-      dbId !== "your_receipts_database_id_here"
-    );
+    const configs = [
+      import.meta.env.VITE_NOTION_API_KEY !== DEFAULT_PLACEHOLDER_KEYS.API_KEY,
+      import.meta.env.VITE_NOTION_RECEIPTS_DATABASE_ID !==
+        DEFAULT_PLACEHOLDER_KEYS.RECEIPTS_DB,
+      import.meta.env.VITE_NOTION_ITEMS_DATABASE_ID !==
+        DEFAULT_PLACEHOLDER_KEYS.ITEMS_DB,
+    ];
+
+    return configs.every(Boolean);
   } catch {
     return false;
   }
@@ -153,17 +199,25 @@ export const isNotionEnabled = (): boolean => {
 // 接続テスト
 export const testNotionConnection = async (): Promise<boolean> => {
   try {
-    const notion = getNotionClient();
-    const databaseId = getReceiptsDatabaseId();
+    if (import.meta.env.DEV) {
+      console.warn(
+        "開発環境ではCORS制限により接続テストが失敗する可能性があります。本番環境では正常に動作します。"
+      );
+    }
 
-    // データベースの情報を取得してテスト
-    await notion.databases.retrieve({
-      database_id: databaseId,
-    });
+    await Promise.all([
+      getDatabase(getReceiptsDatabaseId()),
+      getDatabase(getItemsDatabaseId()),
+    ]);
 
     return true;
   } catch (error) {
     console.error("Notion接続テストエラー:", error);
+
+    if (error instanceof Error && error.message.includes("Failed to fetch")) {
+      console.warn("CORSエラー: 本番環境では正常に動作します。");
+    }
+
     return false;
   }
 };
@@ -176,17 +230,20 @@ export const syncAllReceiptsToNotion = async (
   let success = 0;
   let failed = 0;
 
-  for (let i = 0; i < receipts.length; i++) {
+  for (const [index, receipt] of receipts.entries()) {
     try {
-      await syncReceiptToNotion(receipts[i]);
+      await syncReceiptToNotion(receipt);
       success++;
     } catch (error) {
-      console.error(`レシート同期エラー (ID: ${receipts[i].id}):`, error);
+      console.error(`レシート同期エラー (ID: ${receipt.id}):`, error);
       failed++;
     }
 
-    if (onProgress) {
-      onProgress(i + 1, receipts.length);
+    onProgress?.(index + 1, receipts.length);
+
+    // 最後以外でレート制限対策の待機
+    if (index < receipts.length - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
   }
 

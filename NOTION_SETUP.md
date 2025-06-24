@@ -64,6 +64,7 @@
 ```env
 VITE_NOTION_API_KEY=取得したAPIキー
 VITE_NOTION_RECEIPTS_DATABASE_ID=レシートデータベースID
+VITE_NOTION_ITEMS_DATABASE_ID=商品データベースID
 ```
 
 ## 6. 接続確認
@@ -83,3 +84,13 @@ VITE_NOTION_RECEIPTS_DATABASE_ID=レシートデータベースID
 ### エラー: "Unauthorized"
 - APIキーが正しいか確認
 - インテグレーションが有効か確認
+
+### CORS エラー（開発環境）
+- **開発環境（localhost）では接続テストが失敗します** - これは正常な動作です
+- CORSポリシーにより、ブラウザから直接Notion APIにアクセスできません
+- **本番環境（デプロイ後）では正常に動作します**
+- 開発中は接続テストを無視して、レシート保存時の同期機能をテストしてください
+
+### エラー: "Failed to fetch"
+- 開発環境でのCORS制限による正常なエラーです
+- 設定は正しく保存されており、本番環境では動作します

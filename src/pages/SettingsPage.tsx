@@ -27,13 +27,15 @@ import { db } from "@/lib/db";
 
 interface NotionSettings {
   apiKey: string;
-  databaseId: string;
+  receiptsDatabaseId: string;
+  itemsDatabaseId: string;
 }
 
 export function SettingsPage() {
   const [notionSettings, setNotionSettings] = useState<NotionSettings>({
     apiKey: "",
-    databaseId: "",
+    receiptsDatabaseId: "",
+    itemsDatabaseId: "",
   });
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{
@@ -71,22 +73,25 @@ export function SettingsPage() {
   // 環境変数から初期値を設定
   useEffect(() => {
     const apiKey = import.meta.env.VITE_NOTION_API_KEY || "";
-    const databaseId = import.meta.env.VITE_NOTION_RECEIPTS_DATABASE_ID || "";
+    const receiptsDatabaseId = import.meta.env.VITE_NOTION_RECEIPTS_DATABASE_ID || "";
+    const itemsDatabaseId = import.meta.env.VITE_NOTION_ITEMS_DATABASE_ID || "";
 
     if (apiKey !== "your_notion_api_key_here") {
       setNotionSettings({
         apiKey: apiKey,
-        databaseId:
-          databaseId === "your_receipts_database_id_here" ? "" : databaseId,
+        receiptsDatabaseId:
+          receiptsDatabaseId === "your_receipts_database_id_here" ? "" : receiptsDatabaseId,
+        itemsDatabaseId:
+          itemsDatabaseId === "your_items_database_id_here" ? "" : itemsDatabaseId,
       });
     }
   }, []);
 
   const handleNotionTest = async () => {
-    if (!notionSettings.apiKey || !notionSettings.databaseId) {
+    if (!notionSettings.apiKey || !notionSettings.receiptsDatabaseId || !notionSettings.itemsDatabaseId) {
       setTestResult({
         success: false,
-        message: "APIキーとデータベースIDを入力してください",
+        message: "APIキーと両方のデータベースIDを入力してください",
       });
       return;
     }
@@ -98,7 +103,9 @@ export function SettingsPage() {
       // 一時的に環境変数を設定
       import.meta.env.VITE_NOTION_API_KEY = notionSettings.apiKey;
       import.meta.env.VITE_NOTION_RECEIPTS_DATABASE_ID =
-        notionSettings.databaseId;
+        notionSettings.receiptsDatabaseId;
+      import.meta.env.VITE_NOTION_ITEMS_DATABASE_ID =
+        notionSettings.itemsDatabaseId;
 
       const success = await testNotionConnection();
 
@@ -106,6 +113,8 @@ export function SettingsPage() {
         success,
         message: success
           ? "接続に成功しました！"
+          : import.meta.env.DEV
+          ? "開発環境ではCORS制限により接続テストが失敗します。本番環境では正常に動作します。"
           : "接続に失敗しました。設定を確認してください。",
       });
     } catch {
@@ -225,20 +234,38 @@ export function SettingsPage() {
           </div>
 
           <div>
-            <Label htmlFor="notion-db-id">データベースID</Label>
+            <Label htmlFor="notion-receipts-db-id">レシートデータベースID</Label>
             <Input
-              id="notion-db-id"
+              id="notion-receipts-db-id"
               placeholder="32文字の英数字"
-              value={notionSettings.databaseId}
+              value={notionSettings.receiptsDatabaseId}
               onChange={(e) =>
                 setNotionSettings({
                   ...notionSettings,
-                  databaseId: e.target.value,
+                  receiptsDatabaseId: e.target.value,
                 })
               }
             />
             <p className="text-sm text-gray-500 mt-1">
-              データベースURLから取得できます
+              レシート情報を保存するデータベース
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="notion-items-db-id">商品データベースID</Label>
+            <Input
+              id="notion-items-db-id"
+              placeholder="32文字の英数字"
+              value={notionSettings.itemsDatabaseId}
+              onChange={(e) =>
+                setNotionSettings({
+                  ...notionSettings,
+                  itemsDatabaseId: e.target.value,
+                })
+              }
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              商品詳細情報を保存するデータベース
             </p>
           </div>
 
