@@ -9,17 +9,49 @@ const DEFAULT_PLACEHOLDER_KEYS = {
   ITEMS_DB: "your_items_database_id_here",
 } as const;
 
+// 一時的な設定値を格納するグローバル変数
+let tempNotionConfig: {
+  apiKey?: string;
+  receiptsDatabaseId?: string;
+  itemsDatabaseId?: string;
+} = {};
+
 // 環境変数取得のヘルパー
 const getEnvValue = (
   key: string,
   placeholder: string,
   errorMessage: string
 ): string => {
+  // 一時設定があればそれを使用
+  if (key === "VITE_NOTION_API_KEY" && tempNotionConfig.apiKey) {
+    return tempNotionConfig.apiKey;
+  }
+  if (key === "VITE_NOTION_RECEIPTS_DATABASE_ID" && tempNotionConfig.receiptsDatabaseId) {
+    return tempNotionConfig.receiptsDatabaseId;
+  }
+  if (key === "VITE_NOTION_ITEMS_DATABASE_ID" && tempNotionConfig.itemsDatabaseId) {
+    return tempNotionConfig.itemsDatabaseId;
+  }
+
   const value = import.meta.env[key];
   if (!value || value === placeholder) {
     throw new Error(errorMessage);
   }
   return value;
+};
+
+// 一時的な設定値を設定する関数
+export const setTempNotionConfig = (config: {
+  apiKey?: string;
+  receiptsDatabaseId?: string;
+  itemsDatabaseId?: string;
+}) => {
+  tempNotionConfig = { ...config };
+};
+
+// 一時設定をクリアする関数
+export const clearTempNotionConfig = () => {
+  tempNotionConfig = {};
 };
 
 // API設定の取得

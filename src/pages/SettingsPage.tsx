@@ -22,6 +22,8 @@ import {
   testNotionConnection,
   isNotionEnabled,
   syncAllReceiptsToNotion,
+  setTempNotionConfig,
+  clearTempNotionConfig,
 } from "@/lib/notion";
 import { db } from "@/lib/db";
 
@@ -108,12 +110,12 @@ export function SettingsPage() {
         environment: import.meta.env.DEV ? "development" : "production"
       });
 
-      // 一時的に環境変数を設定
-      import.meta.env.VITE_NOTION_API_KEY = notionSettings.apiKey;
-      import.meta.env.VITE_NOTION_RECEIPTS_DATABASE_ID =
-        notionSettings.receiptsDatabaseId;
-      import.meta.env.VITE_NOTION_ITEMS_DATABASE_ID =
-        notionSettings.itemsDatabaseId;
+      // 一時的な設定値を設定
+      setTempNotionConfig({
+        apiKey: notionSettings.apiKey,
+        receiptsDatabaseId: notionSettings.receiptsDatabaseId,
+        itemsDatabaseId: notionSettings.itemsDatabaseId,
+      });
 
       console.log("testNotionConnection 実行前");
       const success = await testNotionConnection();
@@ -144,6 +146,7 @@ export function SettingsPage() {
       });
     } finally {
       console.log("接続テスト終了");
+      clearTempNotionConfig(); // 一時設定をクリア
       setIsTesting(false);
     }
   };
