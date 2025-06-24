@@ -112,9 +112,11 @@ export function SettingsPage() {
       setTestResult({
         success,
         message: success
-          ? "接続に成功しました！"
+          ? import.meta.env.DEV
+            ? "設定値の確認が完了しました！（開発環境では実際のAPI接続はスキップ）"
+            : "接続に成功しました！"
           : import.meta.env.DEV
-          ? "開発環境ではCORS制限により接続テストが失敗します。本番環境では正常に動作します。"
+          ? "設定値に問題があります。APIキーとデータベースIDを確認してください。"
           : "接続に失敗しました。設定を確認してください。",
       });
     } catch {

@@ -51,6 +51,8 @@ const notionRequest = async (
 ): Promise<unknown> => {
   const apiKey = getNotionApiKey();
 
+  console.log(`Notion API Request: ${options.method || "GET"} ${endpoint}`);
+
   const response = await fetch(`${NOTION_BASE_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -61,8 +63,11 @@ const notionRequest = async (
     },
   });
 
+  console.log(`Notion API Response: ${response.status} ${response.statusText}`);
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
+    console.error("Notion API Error Response:", errorData);
     throw new Error(
       `Notion API Error: ${response.status} ${
         response.statusText
@@ -70,28 +75,42 @@ const notionRequest = async (
     );
   }
 
-  return response.json();
+  const responseData = await response.json();
+  console.log("Notion API Success Response:", responseData);
+  return responseData;
 };
 
-// Notionページプロパティ作成のヘルパー
-const createTextProperty = (content: string) => ({
-  text: { content },
-});
-
+// Notionページプロパティ作成のヘルパー（公式SDK準拠）
 const createTitleProperty = (content: string) => ({
-  title: [createTextProperty(content)],
+  title: [
+    {
+      text: {
+        content: content,
+      },
+    },
+  ],
 });
 
 const createRichTextProperty = (content: string) => ({
-  rich_text: [createTextProperty(content)],
+  rich_text: [
+    {
+      text: {
+        content: content,
+      },
+    },
+  ],
 });
 
 const createDateProperty = (date: Date) => ({
-  date: { start: date.toISOString() },
+  date: {
+    start: date.toISOString(),
+  },
 });
 
 const createDateOnlyProperty = (date: Date) => ({
-  date: { start: date.toISOString().split("T")[0] },
+  date: {
+    start: date.toISOString().split("T")[0],
+  },
 });
 
 const createNumberProperty = (value: number) => ({
@@ -99,11 +118,17 @@ const createNumberProperty = (value: number) => ({
 });
 
 const createSelectProperty = (name: string) => ({
-  select: { name },
+  select: {
+    name: name,
+  },
 });
 
 const createRelationProperty = (id: string) => ({
-  relation: [{ id }],
+  relation: [
+    {
+      id: id,
+    },
+  ],
 });
 
 // レシートページプロパティの作成
@@ -157,26 +182,50 @@ export const syncItemsToNotion = async (
 export const syncReceiptToNotion = async (
   receipt: Receipt
 ): Promise<string> => {
-  const databaseId = getReceiptsDatabaseId();
+  try {
+    const databaseId = getReceiptsDatabaseId();
 
-  const pageData = {
-    parent: { database_id: databaseId },
-    properties: createReceiptProperties(receipt),
-  };
+    console.log("レシート同期開始:", {
+      receiptId: receipt.id,
+      storeName: receipt.storeName,
+      databaseId: databaseId,
+    });
 
-  const receiptPage = (await createPage(pageData)) as { id: string };
+    const pageData = {
+      parent: { database_id: databaseId },
+      properties: createReceiptProperties(receipt),
+    };
 
-  // 商品アイテムも同期（失敗してもレシート同期は成功とする）
-  if (receipt.items?.length > 0) {
-    try {
-      const itemsDatabaseId = getItemsDatabaseId();
-      await syncItemsToNotion(receipt.items, receiptPage.id, itemsDatabaseId);
-    } catch (itemsError) {
-      console.warn("商品アイテムの同期に失敗:", itemsError);
+    console.log("送信データ:", JSON.stringify(pageData, null, 2));
+
+    const receiptPage = (await createPage(pageData)) as { id: string };
+
+    console.log("レシートページ作成成功:", receiptPage.id);
+
+    // 商品アイテムも同期（失敗してもレシート同期は成功とする）
+    if (receipt.items?.length > 0) {
+      try {
+        const itemsDatabaseId = getItemsDatabaseId();
+        console.log(`商品同期開始: ${receipt.items.length}件`);
+        await syncItemsToNotion(receipt.items, receiptPage.id, itemsDatabaseId);
+        console.log("商品同期成功");
+      } catch (itemsError) {
+        console.warn("商品アイテムの同期に失敗:", itemsError);
+      }
     }
-  }
 
-  return receiptPage.id;
+    return receiptPage.id;
+  } catch (error) {
+    console.error("レシート同期エラー詳細:", {
+      error: error,
+      receipt: {
+        id: receipt.id,
+        storeName: receipt.storeName,
+        itemsCount: receipt.items?.length || 0,
+      },
+    });
+    throw error;
+  }
 };
 
 // Notion連携が有効かチェック
@@ -196,15 +245,32 @@ export const isNotionEnabled = (): boolean => {
   }
 };
 
-// 接続テスト
+// 接続テスト（簡易版 - 設定値のみチェック）
 export const testNotionConnection = async (): Promise<boolean> => {
   try {
+    // 開発環境では設定値のみチェック
     if (import.meta.env.DEV) {
       console.warn(
-        "開発環境ではCORS制限により接続テストが失敗する可能性があります。本番環境では正常に動作します。"
+        "開発環境ではCORS制限により実際のAPI接続テストはスキップします。設定値のみチェックします。"
       );
+
+      // 設定値の検証
+      const apiKey = getNotionApiKey();
+      const receiptsDbId = getReceiptsDatabaseId();
+      const itemsDbId = getItemsDatabaseId();
+
+      console.log("設定確認:");
+      console.log(
+        "- API Key:",
+        apiKey ? `${apiKey.substring(0, 10)}...` : "未設定"
+      );
+      console.log("- Receipts DB ID:", receiptsDbId);
+      console.log("- Items DB ID:", itemsDbId);
+
+      return true; // 開発環境では設定があれば成功とする
     }
 
+    // 本番環境では実際のAPI接続テスト
     await Promise.all([
       getDatabase(getReceiptsDatabaseId()),
       getDatabase(getItemsDatabaseId()),
@@ -214,8 +280,20 @@ export const testNotionConnection = async (): Promise<boolean> => {
   } catch (error) {
     console.error("Notion接続テストエラー:", error);
 
-    if (error instanceof Error && error.message.includes("Failed to fetch")) {
-      console.warn("CORSエラー: 本番環境では正常に動作します。");
+    if (error instanceof Error) {
+      if (error.message.includes("Failed to fetch")) {
+        console.warn(
+          "CORS制限: ブラウザからの直接アクセスが制限されています。"
+        );
+      } else if (error.message.includes("Unauthorized")) {
+        console.error(
+          "認証エラー: APIキーが正しくないか、権限が不足しています。"
+        );
+      } else if (error.message.includes("object_not_found")) {
+        console.error(
+          "データベースエラー: 指定されたデータベースIDが見つかりません。"
+        );
+      }
     }
 
     return false;
