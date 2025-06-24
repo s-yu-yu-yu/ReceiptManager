@@ -247,38 +247,77 @@ export const isNotionEnabled = (): boolean => {
 
 // 接続テスト（簡易版 - 設定値のみチェック）
 export const testNotionConnection = async (): Promise<boolean> => {
+  console.log("testNotionConnection 開始");
+  
   try {
+    console.log("環境確認:", {
+      isDev: import.meta.env.DEV,
+      mode: import.meta.env.MODE,
+      prod: import.meta.env.PROD
+    });
+
     // 開発環境では設定値のみチェック
     if (import.meta.env.DEV) {
       console.warn(
         "開発環境ではCORS制限により実際のAPI接続テストはスキップします。設定値のみチェックします。"
       );
-
-      // 設定値の検証
-      const apiKey = getNotionApiKey();
-      const receiptsDbId = getReceiptsDatabaseId();
-      const itemsDbId = getItemsDatabaseId();
-
-      console.log("設定確認:");
-      console.log(
-        "- API Key:",
-        apiKey ? `${apiKey.substring(0, 10)}...` : "未設定"
-      );
-      console.log("- Receipts DB ID:", receiptsDbId);
-      console.log("- Items DB ID:", itemsDbId);
-
-      return true; // 開発環境では設定があれば成功とする
+      
+      try {
+        // 設定値の検証
+        console.log("設定値取得開始");
+        const apiKey = getNotionApiKey();
+        console.log("APIキー取得成功");
+        const receiptsDbId = getReceiptsDatabaseId();
+        console.log("レシートDB ID取得成功");
+        const itemsDbId = getItemsDatabaseId();
+        console.log("商品DB ID取得成功");
+        
+        console.log("設定確認:");
+        console.log(
+          "- API Key:",
+          apiKey ? `${apiKey.substring(0, 10)}...` : "未設定"
+        );
+        console.log("- Receipts DB ID:", receiptsDbId);
+        console.log("- Items DB ID:", itemsDbId);
+        
+        return true; // 開発環境では設定があれば成功とする
+      } catch (configError) {
+        console.error("設定値取得エラー:", configError);
+        throw configError;
+      }
     }
 
     // 本番環境では実際のAPI接続テスト
-    await Promise.all([
-      getDatabase(getReceiptsDatabaseId()),
-      getDatabase(getItemsDatabaseId()),
-    ]);
+    console.log("本番環境でのAPI接続テスト開始");
+    
+    try {
+      const receiptsDbId = getReceiptsDatabaseId();
+      const itemsDbId = getItemsDatabaseId();
+      
+      console.log("データベース接続テスト開始");
+      console.log("レシートDB:", receiptsDbId);
+      console.log("商品DB:", itemsDbId);
+      
+      const results = await Promise.all([
+        getDatabase(receiptsDbId),
+        getDatabase(itemsDbId),
+      ]);
+      
+      console.log("データベース接続テスト成功:", results);
+      return true;
+    } catch (apiError) {
+      console.error("API接続エラー:", apiError);
+      throw apiError;
+    }
 
-    return true;
   } catch (error) {
-    console.error("Notion接続テストエラー:", error);
+    console.error("testNotionConnection エラー詳細:", {
+      error: error,
+      message: error instanceof Error ? error.message : "不明なエラー",
+      stack: error instanceof Error ? error.stack : "スタック情報なし",
+      type: typeof error,
+      constructor: error?.constructor?.name
+    });
 
     if (error instanceof Error) {
       if (error.message.includes("Failed to fetch")) {
@@ -293,6 +332,8 @@ export const testNotionConnection = async (): Promise<boolean> => {
         console.error(
           "データベースエラー: 指定されたデータベースIDが見つかりません。"
         );
+      } else if (error.message.includes("設定されていません")) {
+        console.error("設定エラー:", error.message);
       }
     }
 

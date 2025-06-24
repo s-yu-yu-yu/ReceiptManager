@@ -100,6 +100,14 @@ export function SettingsPage() {
     setTestResult(null);
 
     try {
+      console.log("接続テスト開始", {
+        hasApiKey: !!notionSettings.apiKey,
+        apiKeyPrefix: notionSettings.apiKey ? notionSettings.apiKey.substring(0, 10) + "..." : "なし",
+        receiptsDbId: notionSettings.receiptsDatabaseId,
+        itemsDbId: notionSettings.itemsDatabaseId,
+        environment: import.meta.env.DEV ? "development" : "production"
+      });
+
       // 一時的に環境変数を設定
       import.meta.env.VITE_NOTION_API_KEY = notionSettings.apiKey;
       import.meta.env.VITE_NOTION_RECEIPTS_DATABASE_ID =
@@ -107,7 +115,9 @@ export function SettingsPage() {
       import.meta.env.VITE_NOTION_ITEMS_DATABASE_ID =
         notionSettings.itemsDatabaseId;
 
+      console.log("testNotionConnection 実行前");
       const success = await testNotionConnection();
+      console.log("testNotionConnection 実行後:", success);
 
       setTestResult({
         success,
@@ -119,12 +129,21 @@ export function SettingsPage() {
           ? "設定値に問題があります。APIキーとデータベースIDを確認してください。"
           : "接続に失敗しました。設定を確認してください。",
       });
-    } catch {
+    } catch (error) {
+      console.error("接続テスト中の予期しないエラー:", error);
+      console.error("エラースタック:", error instanceof Error ? error.stack : "スタック情報なし");
+      
+      let errorMessage = "接続テスト中にエラーが発生しました";
+      if (error instanceof Error) {
+        errorMessage += `: ${error.message}`;
+      }
+      
       setTestResult({
         success: false,
-        message: "接続テスト中にエラーが発生しました",
+        message: errorMessage,
       });
     } finally {
+      console.log("接続テスト終了");
       setIsTesting(false);
     }
   };
