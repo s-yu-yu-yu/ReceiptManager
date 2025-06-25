@@ -2,10 +2,10 @@
 
 ---
 
-name: Performance issue
-about: パフォーマンスの問題報告
+name: "⚡ パフォーマンス改善"
+about: "パフォーマンスの問題報告と改善提案"
 title: '[Perf] '
-labels: performance
+labels: "performance"
 assignees: ''
 
 ---

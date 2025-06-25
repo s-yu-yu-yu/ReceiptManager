@@ -2,10 +2,10 @@
 
 ---
 
-name: Feature request
-about: 新機能の提案
-title: '[Feature] '
-labels: enhancement
+name: "✨ 機能リクエスト"
+about: "新機能の提案"
+title: "[Feature] "
+labels: "enhancement"
 assignees: ''
 
 ---

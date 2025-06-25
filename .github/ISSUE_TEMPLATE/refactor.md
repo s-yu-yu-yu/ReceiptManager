@@ -2,11 +2,11 @@
 
 ---
 
-name: Refactoring
-about: コードの改善・リファクタリング
-title: '[Refactor] '
-labels: refactoring
-assignees: ''
+name: "🔧 リファクタリング"
+about: "コードの改善・リファクタリング"
+title: "[Refactor] "
+labels: ["refactoring"]
+assignees: ""
 
 ---
 
