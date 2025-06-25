@@ -1,0 +1,94 @@
+name: 🐛 バグ報告
+description: アプリの不具合を報告する
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        バグの報告をありがとうございます。
+        問題を迅速に解決するため、以下の情報をできるだけ詳しく記入してください。
+
+  - type: textarea
+    id: bug_description
+    attributes:
+      label: 🐛 バグの概要
+      description: バグの内容を簡潔に説明してください
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 💻 OS
+      description: 使用しているオペレーティングシステムを選択してください
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - iOS
+        - Android
+        - その他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: 🌐 ブラウザ
+      description: 使用しているブラウザを選択してください
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - その他
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: 📱 デバイス
+      description: 使用しているデバイスを記入してください（例：iPhone 14, MacBook Pro, etc.）
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: 🔄 再現手順
+      description: バグを再現するための詳細な手順を記入してください
+      placeholder: |
+        1. '...'に移動
+        2. '...'をクリック
+        3. '...'が表示される
+        4. エラーが発生
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: 🎯 期待される動作
+      description: 本来どのような動作をするべきかを説明してください
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: ❌ 実際の動作
+      description: 実際に起こった動作を説明してください
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 📸 スクリーンショット
+      description: 可能であればスクリーンショットや動画を添付してください
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 📝 その他の情報
+      description: その他、問題の解決に役立つ情報があれば記入してください

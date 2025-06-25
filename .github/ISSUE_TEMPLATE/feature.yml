@@ -1,0 +1,80 @@
+name: ✨ 機能リクエスト
+description: 新機能の提案
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        新機能の提案をありがとうございます。
+        機能の詳細と必要性について教えてください。
+
+  - type: textarea
+    id: feature_description
+    attributes:
+      label: 📋 機能の概要
+      description: 提案する機能の内容を簡潔に説明してください
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 💭 背景・動機
+      description: なぜこの機能が必要なのか、どのような問題を解決するのかを説明してください
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🔥 優先度
+      description: この機能の優先度を選択してください
+      options:
+        - 低 - あったら便利
+        - 中 - 重要だが緊急ではない
+        - 高 - 重要かつ緊急
+    validations:
+      required: true
+
+  - type: textarea
+    id: user_story
+    attributes:
+      label: 👤 ユーザーストーリー
+      description: "「〜として、〜したい、なぜなら〜」の形式で記入してください"
+      placeholder: "レシート管理アプリのユーザーとして、カテゴリ別に支出を分析したい、なぜなら月間の支出傾向を把握したいから"
+
+  - type: textarea
+    id: implementation_idea
+    attributes:
+      label: 🛠️ 実装案
+      description: 具体的な実装方法やアプローチがあれば記入してください
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: ✅ 受け入れ条件
+      description: この機能が完成したと判断できる条件を記入してください
+      placeholder: |
+        - ユーザーがカテゴリを選択できる
+        - 選択したカテゴリの支出グラフが表示される
+        - データは月単位で表示される
+
+  - type: checkboxes
+    id: completion_checklist
+    attributes:
+      label: 📝 完了チェックリスト
+      description: 実装時に完了すべき項目を選択してください（複数選択可）
+      options:
+        - label: 機能実装完了
+        - label: ユニットテスト作成
+        - label: 統合テスト作成
+        - label: ドキュメント更新
+        - label: UIの応答性確認
+        - label: アクセシビリティ確認
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 📎 その他の情報
+      description: 参考となるリンクやファイル、スクリーンショットなどがあれば添付してください

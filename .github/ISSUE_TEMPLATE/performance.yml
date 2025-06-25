@@ -1,0 +1,123 @@
+name: ⚡ パフォーマンス改善
+description: パフォーマンスの問題報告と改善提案
+title: "[Perf] "
+labels: ["performance"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        パフォーマンスの問題を報告していただき、ありがとうございます。
+        問題を効率的に解決するため、具体的な計測データと環境情報をお聞かせください。
+
+  - type: textarea
+    id: performance_issue
+    attributes:
+      label: 🐌 パフォーマンス問題の概要
+      description: どこで遅さを感じるか、具体的な操作を教えてください
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: 📈 問題の種類
+      description: パフォーマンス問題の種類を選択してください
+      options:
+        - ページ読み込みが遅い
+        - 操作のレスポンスが遅い
+        - メモリ使用量が多い
+        - バッテリー消費が多い
+        - ネットワーク通信が遅い
+        - その他
+    validations:
+      required: true
+
+  - type: input
+    id: current_time
+    attributes:
+      label: ⏱️ 現在の処理時間
+      description: 現在どのくらい時間がかかっているか記入してください
+      placeholder: "例: 3秒"
+    validations:
+      required: true
+
+  - type: input
+    id: target_time
+    attributes:
+      label: 🎯 目標処理時間
+      description: どのくらいの処理時間を目標とするか記入してください
+      placeholder: "例: 1秒以下"
+    validations:
+      required: true
+
+  - type: textarea
+    id: measurement_data
+    attributes:
+      label: 📊 計測結果
+      description: Chrome DevToolsなどで計測したデータがあれば記入してください
+      placeholder: |
+        - Largest Contentful Paint (LCP): 2.5s
+        - First Input Delay (FID): 100ms
+        - Cumulative Layout Shift (CLS): 0.25
+
+  - type: dropdown
+    id: device_type
+    attributes:
+      label: 📱 デバイス種類
+      description: 問題が発生しているデバイスの種類を選択してください
+      options:
+        - デスクトップ (高性能)
+        - デスクトップ (標準性能)
+        - ノートPC
+        - タブレット
+        - スマートフォン (高性能)  
+        - スマートフォン (標準性能)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: network_condition
+    attributes:
+      label: 🌐 ネットワーク環境
+      description: ネットワーク環境を選択してください
+      options:
+        - WiFi (高速)
+        - WiFi (標準)
+        - 4G/5G
+        - 3G
+        - 低速回線
+    validations:
+      required: true
+
+  - type: input
+    id: data_volume
+    attributes:
+      label: 💾 データ量
+      description: 問題発生時のデータ量を記入してください
+      placeholder: "例: レシート100件、画像50枚"
+
+  - type: textarea
+    id: improvement_suggestions
+    attributes:
+      label: 💡 改善案
+      description: 考えられる最適化方法があれば記入してください
+
+  - type: checkboxes
+    id: optimization_areas
+    attributes:
+      label: 🔧 最適化対象
+      description: 最適化が必要と思われる領域を選択してください（複数選択可）
+      options:
+        - label: 画像の最適化
+        - label: データベースクエリの最適化
+        - label: キャッシュの活用
+        - label: レイジーローディングの実装
+        - label: バンドルサイズの削減
+        - label: CDNの活用
+        - label: コンポーネントの最適化
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 📝 その他の情報
+      description: スクリーンショットや動画、プロファイル結果などがあれば添付してください
