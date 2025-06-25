@@ -127,6 +127,23 @@ bun run lint
 npm run lint
 ```
 
+### テスト
+
+```bash
+# テスト実行
+bun test
+# または
+npm run test
+
+# UIモードでテスト実行
+bun run test:ui
+
+# カバレッジ付きテスト実行
+bun run test:coverage
+```
+
+詳細なテスト情報は [docs/testing.md](docs/testing.md) を参照してください。
+
 ## 使い方
 
 1. **レシート撮影**

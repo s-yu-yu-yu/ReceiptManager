@@ -68,6 +68,7 @@ VITE_NOTION_RECEIPTS_DATABASE_ID=xxx
 ## 開発コマンド
 
 ```bash
+bun add   # 依存関係インストール
 bun dev        # 開発サーバー
 bun build      # ビルド
 bun lint       # Lint
