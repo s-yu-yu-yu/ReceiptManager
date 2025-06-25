@@ -1,0 +1,12 @@
+# .github/ISSUE_TEMPLATE/config.yml
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 ドキュメント
+    url: https://github.com/s-yu-yu-yu/ReceiptManager/wiki
+    about: 使い方やFAQはこちらをご確認ください
+  - name: 💬 ディスカッション
+    url: https://github.com/s-yu-yu-yu/ReceiptManager/discussions
+    about: 機能の提案や質問はディスカッションで
+  - name: 🔒 セキュリティ脆弱性の報告
+    url: https://github.com/s-yu-yu-yu/ReceiptManager/security/policy
+    about: セキュリティに関する問題は公開せずにこちらから報告してください
